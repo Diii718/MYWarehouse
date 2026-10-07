@@ -1,0 +1,1297 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>我的收藏库</title>
+<style>
+:root{
+  --bg:#0f1115;--panel:#161a22;--card:#1b2029;--border:#272d3a;
+  --text:#e7eaf0;--dim:#8b93a7;--accent:#4f8cff;--danger:#ff5c6c;--ok:#3ecf8e;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;
+  background:var(--bg);color:var(--text);font-size:14px;overflow:hidden;
+  -webkit-font-smoothing:antialiased;
+}
+#app{display:flex;height:100vh}
+
+/* ---------- 侧栏 ---------- */
+#sidebar{
+  width:212px;flex:none;background:var(--panel);border-right:1px solid var(--border);
+  display:flex;flex-direction:column;padding:16px 12px 12px;gap:14px;overflow:hidden;
+}
+.brand{font-size:15px;font-weight:700;padding:0 8px;letter-spacing:.5px}
+.brand small{display:block;font-size:10.5px;color:var(--dim);font-weight:400;margin-top:3px;letter-spacing:0}
+.nav{display:flex;flex-direction:column;gap:2px;flex:none}
+.nav button{
+  display:flex;align-items:center;gap:8px;width:100%;padding:8px 10px;border:0;
+  background:transparent;color:var(--dim);border-radius:8px;cursor:pointer;
+  font-size:13.5px;font-family:inherit;text-align:left;transition:.15s;
+}
+.nav button:hover{background:#1e232e;color:var(--text)}
+.nav button.active{background:var(--accent);color:#fff}
+.nav .count{margin-left:auto;font-size:11px;opacity:.75}
+.tag-sec{flex:1;min-height:0;display:flex;flex-direction:column;gap:7px}
+.sec-title{font-size:10.5px;color:var(--dim);text-transform:uppercase;letter-spacing:1.2px;padding:0 8px}
+#tagList{display:flex;flex-wrap:wrap;gap:5px;overflow-y:auto;padding:0 4px 6px;align-content:flex-start}
+#tagList::-webkit-scrollbar{width:5px}
+#tagList::-webkit-scrollbar-thumb{background:#2c3340;border-radius:3px}
+.tag-chip{
+  padding:3px 9px;border-radius:20px;background:#1e232e;border:1px solid var(--border);
+  font-size:11.5px;cursor:pointer;color:var(--dim);white-space:nowrap;transition:.15s;
+}
+.tag-chip:hover{color:var(--text);border-color:#3a4252}
+.tag-chip.active{background:var(--accent);color:#fff;border-color:var(--accent)}
+.side-foot{display:flex;flex-direction:column;gap:6px;flex:none}
+.side-foot button{
+  padding:8px;border-radius:8px;border:1px solid var(--border);background:#1a1f28;
+  color:var(--dim);cursor:pointer;font-size:12.5px;font-family:inherit;transition:.15s;
+}
+.side-foot button:hover{color:var(--text);border-color:#3a4252}
+.tip{font-size:10.5px;color:#5c6478;line-height:1.5;padding:0 4px}
+
+/* ---------- 主区 ---------- */
+#main{flex:1;display:flex;flex-direction:column;min-width:0}
+.topbar{display:flex;gap:10px;align-items:center;padding:14px 20px;border-bottom:1px solid var(--border);flex:none}
+#search{
+  flex:1;max-width:440px;padding:9px 14px;border-radius:9px;border:1px solid var(--border);
+  background:#141821;color:var(--text);font-size:13.5px;font-family:inherit;outline:none;transition:.15s;
+}
+#search:focus{border-color:var(--accent)}
+.btn{
+  padding:9px 16px;border-radius:9px;border:0;background:var(--accent);color:#fff;
+  cursor:pointer;font-size:13.5px;font-family:inherit;font-weight:500;white-space:nowrap;transition:.15s;
+}
+.btn:hover{filter:brightness(1.12)}
+.btn.ghost{background:#1e232e;color:var(--dim);border:1px solid var(--border)}
+.btn.ghost:hover{color:var(--text)}
+.btn.danger{background:transparent;color:var(--danger);border:1px solid #43222a}
+.btn.danger:hover{background:#2a161c}
+
+#content{flex:1;overflow-y:auto;padding:20px}
+#content::-webkit-scrollbar{width:9px}
+#content::-webkit-scrollbar-thumb{background:#252b36;border-radius:5px}
+
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(172px,1fr));gap:14px}
+.card{
+  background:var(--card);border:1px solid var(--border);border-radius:12px;overflow:hidden;
+  cursor:pointer;transition:.16s;position:relative;display:flex;flex-direction:column;
+}
+.card:hover{border-color:#3a4252;transform:translateY(-2px);box-shadow:0 6px 20px rgba(0,0,0,.35)}
+.card .thumb{
+  width:100%;aspect-ratio:4/3;background:#11151c;display:flex;align-items:center;justify-content:center;
+  overflow:hidden;position:relative;
+}
+.card .thumb img{width:100%;height:100%;object-fit:cover;display:block}
+.card .thumb .ph{font-size:34px;font-weight:700;color:#2b3341;user-select:none}
+.card .badge{
+  position:absolute;top:7px;left:7px;padding:2px 7px;border-radius:5px;font-size:10.5px;
+  background:rgba(0,0,0,.65);backdrop-filter:blur(4px);color:#cfd6e2;
+}
+.card .editbtn{
+  position:absolute;top:6px;right:6px;width:24px;height:24px;border-radius:6px;border:0;
+  background:rgba(0,0,0,.6);color:#cfd6e2;cursor:pointer;font-size:12px;line-height:1;
+  opacity:0;transition:.15s;display:flex;align-items:center;justify-content:center;
+}
+.card:hover .editbtn{opacity:1}
+.card .editbtn:hover{background:var(--accent);color:#fff}
+.card .body{padding:10px 11px 11px;display:flex;flex-direction:column;gap:6px;flex:1}
+.card .title{
+  font-size:13px;font-weight:500;line-height:1.35;
+  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;word-break:break-word;
+}
+.card .tags{display:flex;flex-wrap:wrap;gap:4px}
+.card .tags span{font-size:10.5px;color:var(--dim);background:#222833;padding:1.5px 7px;border-radius:20px}
+.card .meta{font-size:11px;color:#5c6478;margin-top:auto}
+
+.empty{display:flex;flex-direction:column;align-items:center;justify-content:center;height:60%;gap:12px;color:var(--dim)}
+.empty .big{font-size:40px;opacity:.35}
+
+/* ---------- 计划 ---------- */
+.plan-card{
+  background:var(--card);border:1px solid var(--border);border-radius:12px;padding:15px 16px;
+  cursor:pointer;transition:.16s;display:flex;flex-direction:column;gap:11px;
+}
+.plan-card:hover{border-color:#3a4252;transform:translateY(-2px)}
+.plan-head{display:flex;align-items:center;gap:9px}
+.plan-head .name{font-size:14.5px;font-weight:600;flex:1;word-break:break-word}
+.plan-head .dot{width:8px;height:8px;border-radius:50%;background:var(--accent);flex:none}
+.plan-val{font-size:22px;font-weight:700;letter-spacing:-.5px}
+.plan-val small{font-size:12px;color:var(--dim);font-weight:400;margin-left:3px}
+.bar{height:7px;background:#222833;border-radius:4px;overflow:hidden}
+.bar i{display:block;height:100%;background:linear-gradient(90deg,var(--accent),#7c5cff);border-radius:4px;transition:.4s}
+.plan-foot{font-size:11.5px;color:var(--dim);display:flex;justify-content:space-between;align-items:center;gap:8px}
+.dots{display:flex;gap:3px}
+.dots i{width:9px;height:9px;border-radius:3px;background:#252b36}
+.dots i.on{background:var(--ok)}
+
+/* ---------- 弹窗 ---------- */
+#modalRoot{display:none;position:fixed;inset:0;z-index:100}
+.modal-mask{
+  position:absolute;inset:0;background:rgba(6,8,12,.72);backdrop-filter:blur(3px);
+  display:flex;align-items:center;justify-content:center;padding:24px;
+}
+.modal{
+  background:var(--panel);border:1px solid var(--border);border-radius:14px;
+  width:100%;max-width:480px;max-height:88vh;overflow-y:auto;padding:22px 22px 18px;
+  box-shadow:0 20px 60px rgba(0,0,0,.6);animation:pop .16s ease;
+}
+.modal.wide{max-width:680px}
+@keyframes pop{from{transform:scale(.96);opacity:0}to{transform:scale(1);opacity:1}}
+.modal h3{font-size:16px;margin-bottom:16px;font-weight:600}
+.modal label{display:block;font-size:12.5px;color:var(--dim);margin-bottom:12px}
+.modal input[type=text],.modal input[type=number],.modal input[type=date],.modal input[type=url],.modal textarea,.modal select{
+  display:block;width:100%;margin-top:5px;padding:9px 12px;border-radius:8px;
+  border:1px solid var(--border);background:#141821;color:var(--text);
+  font-size:13.5px;font-family:inherit;outline:none;transition:.15s;
+}
+.modal input:focus,.modal textarea:focus,.modal select:focus{border-color:var(--accent)}
+.modal textarea{resize:vertical;min-height:64px;line-height:1.5}
+.modal-actions{display:flex;gap:8px;margin-top:18px;align-items:center}
+.modal-actions .sp{flex:1}
+.row{display:flex;gap:12px}
+.row label{flex:1}
+
+/* ---------- 图片查看 ---------- */
+#lightbox{
+  display:none;position:fixed;inset:0;z-index:200;background:rgba(6,8,12,.94);
+  align-items:center;justify-content:center;cursor:zoom-out;padding:30px;
+}
+#lightbox img{max-width:100%;max-height:100%;object-fit:contain;border-radius:6px;box-shadow:0 20px 70px rgba(0,0,0,.8)}
+
+/* ---------- toast ---------- */
+#toast{
+  position:fixed;bottom:26px;left:50%;transform:translateX(-50%) translateY(20px);
+  background:#232a36;border:1px solid var(--border);color:var(--text);
+  padding:10px 20px;border-radius:10px;font-size:13px;opacity:0;pointer-events:none;
+  transition:.25s;z-index:300;box-shadow:0 8px 30px rgba(0,0,0,.5);
+}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+#toast.err{border-color:#43222a;color:#ffb3bc}
+
+/* ---------- 进度遮罩 ---------- */
+#progress{
+  display:none;position:fixed;inset:0;z-index:400;background:rgba(6,8,12,.8);
+  align-items:center;justify-content:center;flex-direction:column;gap:14px;
+}
+#progress .pbox{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:22px 30px;text-align:center}
+#progress .pbox .t{font-size:14px;margin-bottom:10px}
+#progress .bar{width:220px}
+</style>
+</head>
+<body>
+
+<div id="app">
+  <aside id="sidebar">
+    <div class="brand">我的收藏库<small>本机运行 · 数据存在浏览器里</small></div>
+    <nav class="nav" id="nav">
+      <button data-view="all">📚 全部 <span class="count" data-c="all"></span></button>
+      <button data-view="image">🖼️ 图片 <span class="count" data-c="image"></span></button>
+      <button data-view="site">🔖 网站 <span class="count" data-c="site"></span></button>
+      <button data-view="anime">📺 动漫 <span class="count" data-c="anime"></span></button>
+      <button data-view="plan">🎯 计划 <span class="count" data-c="plan"></span></button>
+    </nav>
+    <div class="tag-sec">
+      <div class="sec-title">标签</div>
+      <div id="tagList"></div>
+    </div>
+    <div class="side-foot">
+      <button id="btnExport">⬇ 导出备份</button>
+      <button id="btnImport">⬆ 导入备份</button>
+      <input type="file" id="fileImport" accept=".json" style="display:none">
+    </div>
+    <div class="tip">⚠ 别移动或重命名这个 HTML 文件，否则数据会读不到。建议每月导出一次备份。</div>
+  </aside>
+
+  <main id="main">
+    <div class="topbar">
+      <input id="search" type="text" placeholder="搜索标题、备注、标签、网址…">
+      <button class="btn" id="btnAdd">＋ 添加</button>
+    </div>
+    <div id="content"></div>
+  </main>
+</div>
+
+<div id="modalRoot"></div>
+<div id="lightbox"></div>
+<div id="toast"></div>
+<div id="progress"><div class="pbox"><div class="t" id="progText">处理中…</div><div class="bar"><i id="progBar" style="width:0%"></i></div></div></div>
+<input type="file" id="fileImages" accept="image/*,video/*" multiple style="display:none">
+
+<script>
+/* =====================================================
+   基础工具
+===================================================== */
+const $ = s => document.querySelector(s);
+const $$ = s => [...document.querySelectorAll(s)];
+const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+
+function esc(s){
+  return String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+function todayStr(){
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+}
+function fmtDate(ts){
+  const d = new Date(ts);
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+}
+let toastTimer;
+function toast(msg, isErr){
+  const el = $('#toast');
+  el.textContent = msg;
+  el.className = isErr ? 'show err' : 'show';
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.className = '', 2400);
+}
+function download(blob, name){
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = name;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+}
+function blobToDataURL(blob){
+  return new Promise((res, rej) => {
+    const r = new FileReader();
+    r.onload = () => res(r.result);
+    r.onerror = () => rej(r.error);
+    r.readAsDataURL(blob);
+  });
+}
+function dataURLToBlob(d){
+  const [meta, b64] = d.split(',');
+  const mime = (meta.match(/:(.*?);/) || [, 'image/jpeg'])[1];
+  const bin = atob(b64);
+  const arr = new Uint8Array(bin.length);
+  for (let i = 0; i < bin.length; i++) arr[i] = bin.charCodeAt(i);
+  return new Blob([arr], {type: mime});
+}
+
+/* =====================================================
+   IndexedDB
+===================================================== */
+const DB_NAME = 'myVault';
+const DB_VER = 1;
+let db = null;
+
+function openDB(){
+  return new Promise((res, rej) => {
+    const req = indexedDB.open(DB_NAME, DB_VER);
+    req.onupgradeneeded = e => {
+      const d = e.target.result;
+      if (!d.objectStoreNames.contains('items')){
+        const s = d.createObjectStore('items', {keyPath: 'id'});
+        s.createIndex('type', 'type');
+        s.createIndex('updatedAt', 'updatedAt');
+      }
+      if (!d.objectStoreNames.contains('plans')){
+        d.createObjectStore('plans', {keyPath: 'id'});
+      }
+      if (!d.objectStoreNames.contains('logs')){
+        const s = d.createObjectStore('logs', {keyPath: 'id'});
+        s.createIndex('planId', 'planId');
+      }
+    };
+    req.onsuccess = e => { db = e.target.result; res(db); };
+    req.onerror = e => rej(e.target.error);
+    req.onblocked = () => rej(new Error('数据库被其他标签页占用'));
+  });
+}
+function store(name, mode='readonly'){ return db.transaction(name, mode).objectStore(name); }
+function idbGetAll(name){
+  return new Promise((res, rej) => {
+    const r = store(name).getAll();
+    r.onsuccess = () => res(r.result || []);
+    r.onerror = () => rej(r.error);
+  });
+}
+function idbPut(name, val){
+  return new Promise((res, rej) => {
+    const r = store(name, 'readwrite').put(val);
+    r.onsuccess = () => res(r.result);
+    r.onerror = () => rej(r.error);
+  });
+}
+function idbDel(name, key){
+  return new Promise((res, rej) => {
+    const r = store(name, 'readwrite').delete(key);
+    r.onsuccess = () => res();
+    r.onerror = () => rej(r.error);
+  });
+}
+function idbClear(name){
+  return new Promise((res, rej) => {
+    const r = store(name, 'readwrite').clear();
+    r.onsuccess = () => res();
+    r.onerror = () => rej(r.error);
+  });
+}
+
+/* =====================================================
+   全局状态
+===================================================== */
+const state = {
+  view: 'all',
+  tag: null,
+  search: '',
+  items: [],
+  plans: [],
+  logs: [],
+  shown: 0,
+  pageSize: 60,
+  filtered: [],
+  urlCache: new Map(),
+};
+const TYPE_LABEL = {image:'图片', site:'网站', anime:'动漫'};
+const ANIME_STATUS = ['想看', '在看', '看完', '搁置', '弃番'];
+
+/* =====================================================
+   图片压缩 / 视频截帧
+===================================================== */
+function compressImage(file, maxSide = 900, quality = 0.82){
+  return new Promise((res, rej) => {
+    const img = new Image();
+    const url = URL.createObjectURL(file);
+    img.onload = () => {
+      let w = img.naturalWidth, h = img.naturalHeight;
+      const scale = Math.min(1, maxSide / Math.max(w, h));
+      w = Math.max(1, Math.round(w * scale));
+      h = Math.max(1, Math.round(h * scale));
+      const c = document.createElement('canvas');
+      c.width = w; c.height = h;
+      const ctx = c.getContext('2d');
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(0, 0, w, h);
+      ctx.drawImage(img, 0, 0, w, h);
+      c.toBlob(b => {
+        URL.revokeObjectURL(url);
+        b ? res({blob: b, w, h}) : rej(new Error('压缩失败'));
+      }, 'image/jpeg', quality);
+    };
+    img.onerror = () => { URL.revokeObjectURL(url); rej(new Error('图片读取失败')); };
+    img.src = url;
+  });
+}
+
+function grabVideoFrame(file, maxSide = 900){
+  return new Promise((res, rej) => {
+    const v = document.createElement('video');
+    v.preload = 'metadata';
+    v.muted = true;
+    v.playsInline = true;
+    const url = URL.createObjectURL(file);
+    let done = false;
+    const finish = () => {
+      if (done) return; done = true;
+      try {
+        let w = v.videoWidth, h = v.videoHeight;
+        if (!w || !h) { URL.revokeObjectURL(url); return rej(new Error('无法读取视频尺寸')); }
+        const scale = Math.min(1, maxSide / Math.max(w, h));
+        w = Math.round(w * scale); h = Math.round(h * scale);
+        const c = document.createElement('canvas');
+        c.width = w; c.height = h;
+        c.getContext('2d').drawImage(v, 0, 0, w, h);
+        c.toBlob(b => {
+          URL.revokeObjectURL(url);
+          b ? res({blob: b, w, h}) : rej(new Error('截帧失败'));
+        }, 'image/jpeg', 0.82);
+      } catch(err){ URL.revokeObjectURL(url); rej(err); }
+    };
+    v.onloadeddata = () => {
+      const t = (v.duration && isFinite(v.duration)) ? Math.min(1, v.duration / 3) : 0;
+      if (t > 0) { try { v.currentTime = t; } catch(e){ finish(); } }
+      else finish();
+    };
+    v.onseeked = finish;
+    v.onerror = () => { URL.revokeObjectURL(url); rej(new Error('视频读取失败')); };
+    setTimeout(() => { if (!done) finish(); }, 6000);
+    v.src = url;
+  });
+}
+
+/* =====================================================
+   数据加载
+===================================================== */
+async function loadAll(){
+  state.items = await idbGetAll('items');
+  state.plans = await idbGetAll('plans');
+  state.logs  = await idbGetAll('logs');
+  state.items.sort((a, b) => (b.updatedAt || 0) - (a.updatedAt || 0));
+}
+
+function getURL(item){
+  if (!item.blob) return '';
+  if (state.urlCache.has(item.id)) return state.urlCache.get(item.id);
+  const u = URL.createObjectURL(item.blob);
+  state.urlCache.set(item.id, u);
+  return u;
+}
+function revokeURL(id){
+  if (state.urlCache.has(id)){
+    URL.revokeObjectURL(state.urlCache.get(id));
+    state.urlCache.delete(id);
+  }
+}
+
+/* =====================================================
+   渲染 —— 侧栏
+===================================================== */
+function renderNav(){
+  $$('#nav button').forEach(b => {
+    b.classList.toggle('active', b.dataset.view === state.view && !state.tag);
+  });
+  const counts = {
+    all: state.items.length,
+    image: state.items.filter(i => i.type === 'image').length,
+    site: state.items.filter(i => i.type === 'site').length,
+    anime: state.items.filter(i => i.type === 'anime').length,
+    plan: state.plans.length,
+  };
+  $$('#nav .count').forEach(el => {
+    const k = el.dataset.c;
+    el.textContent = counts[k] ? counts[k] : '';
+  });
+}
+
+function renderTags(){
+  const map = new Map();
+  state.items.forEach(it => (it.tags || []).forEach(t => map.set(t, (map.get(t) || 0) + 1)));
+  const list = [...map.entries()].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]));
+  const el = $('#tagList');
+  if (!list.length){ el.innerHTML = '<span style="font-size:11.5px;color:#5c6478;padding:0 4px">还没有标签</span>'; return; }
+  el.innerHTML = list.map(([t, n]) =>
+    `<span class="tag-chip ${state.tag === t ? 'active' : ''}" data-tag="${esc(t)}">${esc(t)} ${n}</span>`
+  ).join('');
+}
+
+/* =====================================================
+   渲染 —— 内容区
+===================================================== */
+function renderContent(){
+  const c = $('#content');
+  if (state.view === 'plan'){ renderPlans(c); return; }
+
+  state.filtered = filterItems();
+  state.shown = Math.min(state.pageSize, state.filtered.length);
+
+  if (!state.filtered.length){
+    c.innerHTML = `<div class="empty"><div class="big">📭</div><div>这里还没有东西</div>
+      <div style="font-size:12.5px">点右上角「＋ 添加」开始收藏</div></div>`;
+    return;
+  }
+  c.innerHTML = `<div class="grid" id="grid"></div>`;
+  appendCards();
+}
+
+function filterItems(){
+  let list = state.items;
+  if (state.view !== 'all') list = list.filter(i => i.type === state.view);
+  if (state.tag) list = list.filter(i => (i.tags || []).includes(state.tag));
+  const q = state.search.trim().toLowerCase();
+  if (q){
+    list = list.filter(i => {
+      const hay = [i.title, i.note, i.url, i.source, i.status, (i.tags || []).join(' ')]
+        .filter(Boolean).join(' ').toLowerCase();
+      return hay.includes(q);
+    });
+  }
+  return list;
+}
+
+function appendCards(){
+  const grid = $('#grid');
+  if (!grid) return;
+  const slice = state.filtered.slice(state.shown - Math.min(state.pageSize, state.shown), state.shown);
+  const startIdx = state.shown - slice.length;
+  const html = slice.map((it, i) => cardHTML(it, startIdx + i)).join('');
+  grid.insertAdjacentHTML('beforeend', html);
+}
+
+function cardHTML(it){
+  const tags = (it.tags || []).slice(0, 3).map(t => `<span>${esc(t)}</span>`).join('');
+  if (it.type === 'image'){
+    const u = getURL(it);
+    return `<div class="card" data-id="${it.id}" data-act="view">
+      <div class="thumb">
+        ${u ? `<img src="${u}" loading="lazy" alt="">` : '<div class="ph">🖼</div>'}
+        ${it.isVideo ? '<div class="badge">视频</div>' : ''}
+        <button class="editbtn" data-id="${it.id}" data-act="edit">✎</button>
+      </div>
+      <div class="body">
+        <div class="title">${esc(it.title || '未命名')}</div>
+        ${tags ? `<div class="tags">${tags}</div>` : ''}
+        <div class="meta">${fmtDate(it.createdAt || it.updatedAt)}</div>
+      </div>
+    </div>`;
+  }
+  if (it.type === 'site'){
+    let host = '';
+    try { host = new URL(it.url).hostname.replace(/^www\./, ''); } catch(e){ host = it.url || ''; }
+    const letter = (it.title || host || '?').trim().charAt(0).toUpperCase();
+    return `<div class="card" data-id="${it.id}" data-act="open">
+      <div class="thumb"><div class="ph">${esc(letter)}</div></div>
+      <div class="body">
+        <div class="title">${esc(it.title || host || '未命名')}</div>
+        ${tags ? `<div class="tags">${tags}</div>` : ''}
+        <div class="meta">${esc(host)}</div>
+        <button class="editbtn" data-id="${it.id}" data-act="edit" style="opacity:1;top:auto;bottom:9px">✎</button>
+      </div>
+    </div>`;
+  }
+  if (it.type === 'anime'){
+    const u = getURL(it);
+    const prog = it.totalEp ? `${it.currentEp || 0}/${it.totalEp}` : (it.currentEp ? `${it.currentEp} 集` : '');
+    return `<div class="card" data-id="${it.id}" data-act="edit">
+      <div class="thumb">
+        ${u ? `<img src="${u}" loading="lazy" alt="">` : '<div class="ph">📺</div>'}
+        ${it.status ? `<div class="badge">${esc(it.status)}</div>` : ''}
+      </div>
+      <div class="body">
+        <div class="title">${esc(it.title || '未命名')}</div>
+        ${tags ? `<div class="tags">${tags}</div>` : ''}
+        <div class="meta">${esc(prog)}</div>
+      </div>
+    </div>`;
+  }
+  return '';
+}
+
+/* =====================================================
+   渲染 —— 计划
+===================================================== */
+function renderPlans(c){
+  if (!state.plans.length){
+    c.innerHTML = `<div class="empty"><div class="big">🎯</div><div>还没有计划</div>
+      <div style="font-size:12.5px">点右上角「＋ 添加」新建一个计划</div></div>`;
+    return;
+  }
+  const plans = [...state.plans].sort((a, b) => (b.updatedAt || 0) - (a.updatedAt || 0));
+  c.innerHTML = `<div class="grid" style="grid-template-columns:repeat(auto-fill,minmax(300px,1fr))">
+    ${plans.map(p => planCardHTML(p)).join('')}
+  </div>`;
+}
+
+function planCardHTML(p){
+  const logs = state.logs.filter(l => l.planId === p.id).sort((a, b) => a.date.localeCompare(b.date));
+  let valHTML = '', barHTML = '', footHTML = '';
+  if (p.kind === 'number'){
+    const last = logs.length ? logs[logs.length - 1].value : null;
+    const start = p.startValue != null && p.startValue !== '' ? Number(p.startValue) : null;
+    const target = p.target != null && p.target !== '' ? Number(p.target) : null;
+    valHTML = `<div class="plan-val">${last != null ? last : '—'}<small>${esc(p.unit || '')}</small></div>`;
+    let pct = 0;
+    if (last != null && start != null && target != null && start !== target){
+      pct = Math.max(0, Math.min(100, ((start - last) / (start - target)) * 100));
+      if (target > start) pct = Math.max(0, Math.min(100, ((last - start) / (target - start)) * 100));
+    }
+    barHTML = `<div class="bar"><i style="width:${pct}%"></i></div>`;
+    const remain = (last != null && target != null) ? Math.abs(target - last).toFixed(1) : null;
+    footHTML = `<span>${start != null ? '起点 ' + start : ''} ${target != null ? '→ 目标 ' + target : ''}</span>
+      <span>${remain != null ? '还差 ' + remain : ''}</span>`;
+  } else {
+    const total = logs.length;
+    // 连续天数
+    const dates = new Set(logs.map(l => l.date));
+    let streak = 0;
+    const d = new Date();
+    for (;;){
+      const s = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+      if (dates.has(s)){ streak++; d.setDate(d.getDate() - 1); } else break;
+      if (streak > 9999) break;
+    }
+    valHTML = `<div class="plan-val">${total}<small>次打卡</small></div>`;
+    // 最近 14 天
+    let dots = '';
+    for (let i = 13; i >= 0; i--){
+      const dd = new Date(); dd.setDate(dd.getDate() - i);
+      const s = `${dd.getFullYear()}-${String(dd.getMonth()+1).padStart(2,'0')}-${String(dd.getDate()).padStart(2,'0')}`;
+      dots += `<i class="${dates.has(s) ? 'on' : ''}" title="${s}"></i>`;
+    }
+    barHTML = `<div class="dots">${dots}</div>`;
+    footHTML = `<span>连续 ${streak} 天</span><span>共 ${total} 次</span>`;
+  }
+  return `<div class="plan-card" data-id="${p.id}" data-act="plan">
+    <div class="plan-head"><span class="dot"></span><span class="name">${esc(p.name)}</span></div>
+    ${valHTML}
+    ${barHTML}
+    <div class="plan-foot">${footHTML}</div>
+  </div>`;
+}
+
+/* =====================================================
+   模态框
+===================================================== */
+function openModal(html, wide){
+  const root = $('#modalRoot');
+  root.innerHTML = `<div class="modal-mask"><div class="modal ${wide ? 'wide' : ''}">${html}</div></div>`;
+  root.style.display = 'block';
+  root.querySelector('.modal-mask').addEventListener('mousedown', e => {
+    if (e.target.classList.contains('modal-mask')) closeModal();
+  });
+}
+function closeModal(){
+  const root = $('#modalRoot');
+  root.style.display = 'none';
+  root.innerHTML = '';
+}
+
+/* =====================================================
+   编辑器 —— 通用条目
+===================================================== */
+function openItemEditor(type, item){
+  const isNew = !item;
+  const it = item || {type, title:'', tags:[], note:''};
+  let fields = '';
+
+  if (type === 'image'){
+    fields = `
+      <label>标题<input type="text" id="f-title" value="${esc(it.title || '')}" placeholder="给这张图起个名字"></label>
+      <label>标签（用逗号分隔）<input type="text" id="f-tags" value="${esc((it.tags || []).join(', '))}" placeholder="壁纸, 风景, 参考"></label>
+      <label>来源 / 原文件路径<input type="text" id="f-source" value="${esc(it.source || '')}" placeholder="可选，比如 D:\\图片\\xxx.jpg"></label>
+      <label>备注<textarea id="f-note" placeholder="可选">${esc(it.note || '')}</textarea></label>`;
+  } else if (type === 'site'){
+    fields = `
+      <label>标题<input type="text" id="f-title" value="${esc(it.title || '')}" placeholder="留空则用域名"></label>
+      <label>网址<input type="text" id="f-url" value="${esc(it.url || '')}" placeholder="https://..."></label>
+      <label>标签（用逗号分隔）<input type="text" id="f-tags" value="${esc((it.tags || []).join(', '))}" placeholder="工具, 设计"></label>
+      <label>备注<textarea id="f-note" placeholder="可选">${esc(it.note || '')}</textarea></label>`;
+  } else if (type === 'anime'){
+    fields = `
+      <label>名称<input type="text" id="f-title" value="${esc(it.title || '')}"></label>
+      <div class="row">
+        <label>状态<select id="f-status">
+          ${ANIME_STATUS.map(s => `<option ${it.status === s ? 'selected' : ''}>${s}</option>`).join('')}
+        </select></label>
+        <label>看到第几集<input type="number" id="f-cur" min="0" value="${it.currentEp || 0}"></label>
+        <label>总集数<input type="number" id="f-total" min="0" value="${it.totalEp || 0}"></label>
+      </div>
+      <label>标签（用逗号分隔）<input type="text" id="f-tags" value="${esc((it.tags || []).join(', '))}" placeholder="2024, 治愈"></label>
+      <label>备注<textarea id="f-note" placeholder="可选">${esc(it.note || '')}</textarea></label>
+      ${isNew ? '' : `<label>封面（点下方按钮替换）</label>
+      <button class="btn ghost" id="f-cover" style="width:100%;margin-bottom:12px">选择封面图片</button>`}`;
+  }
+
+  openModal(`
+    <h3>${isNew ? '添加' : '编辑'}${TYPE_LABEL[type] || ''}</h3>
+    ${fields}
+    <div class="modal-actions">
+      ${isNew ? '' : '<button class="btn danger" id="f-del">删除</button>'}
+      <span class="sp"></span>
+      <button class="btn ghost" id="f-cancel">取消</button>
+      <button class="btn" id="f-save">保存</button>
+    </div>
+  `);
+
+  $('#f-cancel').onclick = closeModal;
+  $('#f-save').onclick = async () => {
+    const title = ($('#f-title')?.value || '').trim();
+    const tags = ($('#f-tags')?.value || '').split(/[,，]/).map(s => s.trim()).filter(Boolean);
+    const note = ($('#f-note')?.value || '').trim();
+
+    const obj = { ...it, type, tags, note, updatedAt: Date.now() };
+    if (!obj.createdAt) obj.createdAt = Date.now();
+    if (!obj.id) obj.id = uid();
+
+    if (type === 'image'){
+      obj.title = title || '未命名';
+      obj.source = ($('#f-source')?.value || '').trim();
+    } else if (type === 'site'){
+      const url = ($('#f-url')?.value || '').trim();
+      if (!url){ toast('请填写网址', true); return; }
+      obj.url = /^https?:\/\//i.test(url) ? url : 'https://' + url;
+      if (!title){ try { obj.title = new URL(obj.url).hostname.replace(/^www\./, ''); } catch(e){ obj.title = obj.url; } }
+      else obj.title = title;
+    } else if (type === 'anime'){
+      if (!title){ toast('请填写名称', true); return; }
+      obj.title = title;
+      obj.status = $('#f-status').value;
+      obj.currentEp = Number($('#f-cur').value) || 0;
+      obj.totalEp = Number($('#f-total').value) || 0;
+    }
+
+    await idbPut('items', obj);
+    await loadAll();
+    closeModal();
+    renderNav(); renderTags(); renderContent();
+    toast('已保存');
+  };
+
+  if (!isNew){
+    const del = $('#f-del');
+    if (del) del.onclick = async () => {
+      if (!confirm('确定删除这条收藏吗？')) return;
+      revokeURL(it.id);
+      await idbDel('items', it.id);
+      await loadAll();
+      closeModal();
+      renderNav(); renderTags(); renderContent();
+      toast('已删除');
+    };
+    const coverBtn = $('#f-cover');
+    if (coverBtn) coverBtn.onclick = () => {
+      const inp = document.createElement('input');
+      inp.type = 'file'; inp.accept = 'image/*';
+      inp.onchange = async () => {
+        const f = inp.files[0];
+        if (!f) return;
+        try {
+          const {blob} = await compressImage(f);
+          it.blob = blob;
+          await idbPut('items', it);
+          await loadAll();
+          revokeURL(it.id);
+          renderContent();
+          toast('封面已更新');
+        } catch(e){ toast('处理失败', true); }
+      };
+      inp.click();
+    };
+  }
+}
+
+/* =====================================================
+   编辑器 —— 计划
+===================================================== */
+function openPlanEditor(plan){
+  const isNew = !plan;
+  const p = plan || {name:'', kind:'check', unit:'', target:'', startValue:'', note:''};
+  openModal(`
+    <h3>${isNew ? '新建计划' : '编辑计划'}</h3>
+    <label>计划名称<input type="text" id="p-name" value="${esc(p.name)}" placeholder="比如：减肥 / 每天跑步 / 早起"></label>
+    <label>类型<select id="p-kind">
+      <option value="check" ${p.kind === 'check' ? 'selected' : ''}>打卡型（每天打勾）</option>
+      <option value="number" ${p.kind === 'number' ? 'selected' : ''}>数值型（记录数字，如体重）</option>
+    </select></label>
+    <div id="numFields" style="display:${p.kind === 'number' ? 'block' : 'none'}">
+      <div class="row">
+        <label>起始值<input type="number" step="any" id="p-start" value="${p.startValue ?? ''}" placeholder="比如 75"></label>
+        <label>目标值<input type="number" step="any" id="p-target" value="${p.target ?? ''}" placeholder="比如 65"></label>
+      </div>
+      <label>单位<input type="text" id="p-unit" value="${esc(p.unit || '')}" placeholder="kg / 公里 / 分钟"></label>
+    </div>
+    <label>备注<textarea id="p-note" placeholder="可选">${esc(p.note || '')}</textarea></label>
+    <div class="modal-actions">
+      ${isNew ? '' : '<button class="btn danger" id="p-del">删除</button>'}
+      <span class="sp"></span>
+      <button class="btn ghost" id="p-cancel">取消</button>
+      <button class="btn" id="p-save">保存</button>
+    </div>
+  `);
+  $('#p-kind').onchange = e => {
+    $('#numFields').style.display = e.target.value === 'number' ? 'block' : 'none';
+  };
+  $('#p-cancel').onclick = closeModal;
+  $('#p-save').onclick = async () => {
+    const name = $('#p-name').value.trim();
+    if (!name){ toast('请填写名称', true); return; }
+    const obj = {
+      ...p,
+      name,
+      kind: $('#p-kind').value,
+      unit: $('#p-unit') ? $('#p-unit').value.trim() : '',
+      target: $('#p-target') ? $('#p-target').value : '',
+      startValue: $('#p-start') ? $('#p-start').value : '',
+      note: $('#p-note').value.trim(),
+      updatedAt: Date.now(),
+    };
+    if (!obj.id) obj.id = uid();
+    if (!obj.createdAt) obj.createdAt = Date.now();
+    await idbPut('plans', obj);
+    await loadAll();
+    closeModal();
+    renderNav(); renderContent();
+    toast('已保存');
+  };
+  if (!isNew){
+    $('#p-del').onclick = async () => {
+      if (!confirm('删除这个计划？所有打卡记录也会一起删除。')) return;
+      for (const l of state.logs.filter(l => l.planId === plan.id)) await idbDel('logs', l.id);
+      await idbDel('plans', plan.id);
+      await loadAll();
+      closeModal();
+      renderNav(); renderContent();
+      toast('已删除');
+    };
+  }
+}
+
+/* =====================================================
+   计划详情
+===================================================== */
+function openPlanDetail(planId){
+  const p = state.plans.find(x => x.id === planId);
+  if (!p) return;
+  const logs = state.logs.filter(l => l.planId === planId).sort((a, b) => a.date.localeCompare(b.date));
+  const isNum = p.kind === 'number';
+
+  let bodyHTML = '';
+  if (isNum){
+    bodyHTML = `
+      <div style="background:#141821;border:1px solid var(--border);border-radius:10px;padding:14px;margin-bottom:16px">
+        <canvas id="chart" style="width:100%;height:180px;display:block"></canvas>
+      </div>
+      <div style="display:flex;gap:8px;margin-bottom:16px">
+        <input type="number" step="any" id="log-val" placeholder="记录数值" style="flex:1;padding:9px 12px;border-radius:8px;border:1px solid var(--border);background:#141821;color:var(--text);font-family:inherit;font-size:13.5px;outline:none">
+        <input type="date" id="log-date" value="${todayStr()}" style="padding:9px 12px;border-radius:8px;border:1px solid var(--border);background:#141821;color:var(--text);font-family:inherit;font-size:13.5px;outline:none">
+        <button class="btn" id="log-add">记录</button>
+      </div>`;
+  } else {
+    const dates = new Set(logs.map(l => l.date));
+    let heat = '';
+    for (let i = 90; i >= 0; i--){
+      const d = new Date(); d.setDate(d.getDate() - i);
+      const s = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+      heat += `<div title="${s}" style="width:14px;height:14px;border-radius:4px;background:${dates.has(s) ? 'var(--ok)' : '#222833'}"></div>`;
+    }
+    bodyHTML = `
+      <div style="background:#141821;border:1px solid var(--border);border-radius:10px;padding:14px;margin-bottom:16px">
+        <div style="font-size:12px;color:var(--dim);margin-bottom:10px">最近 90 天</div>
+        <div style="display:grid;grid-template-columns:repeat(15,1fr);gap:4px">${heat}</div>
+      </div>
+      <div style="display:flex;gap:8px;margin-bottom:16px">
+        <input type="date" id="log-date" value="${todayStr()}" style="flex:1;padding:9px 12px;border-radius:8px;border:1px solid var(--border);background:#141821;color:var(--text);font-family:inherit;font-size:13.5px;outline:none">
+        <button class="btn" id="log-add">打卡</button>
+      </div>`;
+  }
+
+  const logList = [...logs].reverse().slice(0, 60).map(l => `
+    <div style="display:flex;align-items:center;gap:10px;padding:8px 10px;border-bottom:1px solid #1f242e;font-size:13px">
+      <span style="color:var(--dim);font-size:12px;min-width:80px">${l.date}</span>
+      <span style="flex:1">${isNum ? l.value + ' ' + esc(p.unit || '') : '✔ 已打卡'}</span>
+      <button data-logdel="${l.id}" style="border:0;background:transparent;color:#5c6478;cursor:pointer;font-size:12px">删除</button>
+    </div>`).join('') || '<div style="color:#5c6478;font-size:12.5px;padding:10px">还没有记录</div>';
+
+  openModal(`
+    <h3>${esc(p.name)}</h3>
+    ${bodyHTML}
+    <div style="max-height:220px;overflow-y:auto;border:1px solid var(--border);border-radius:10px">${logList}</div>
+    <div class="modal-actions">
+      <button class="btn danger" id="pd-del">删除计划</button>
+      <span class="sp"></span>
+      <button class="btn ghost" id="pd-edit">编辑</button>
+      <button class="btn ghost" id="pd-close">关闭</button>
+    </div>
+  `, true);
+
+  if (isNum) drawChart($('#chart'), logs);
+
+  $('#pd-close').onclick = closeModal;
+  $('#pd-edit').onclick = () => openPlanEditor(p);
+  $('#pd-del').onclick = async () => {
+    if (!confirm('删除这个计划？所有记录一起删除。')) return;
+    for (const l of logs) await idbDel('logs', l.id);
+    await idbDel('plans', p.id);
+    await loadAll();
+    closeModal(); renderNav(); renderContent();
+    toast('已删除');
+  };
+
+  $('#log-add').onclick = async () => {
+    const date = $('#log-date').value || todayStr();
+    let value = 1;
+    if (isNum){
+      const v = parseFloat($('#log-val').value);
+      if (isNaN(v)){ toast('请输入数值', true); return; }
+      value = v;
+    }
+    await idbPut('logs', {id: uid(), planId: p.id, date, value});
+    await loadAll();
+    openPlanDetail(p.id);
+    renderContent();
+    toast('已记录');
+  };
+
+  $$('[data-logdel]').forEach(b => {
+    b.onclick = async () => {
+      await idbDel('logs', b.dataset.logdel);
+      await loadAll();
+      openPlanDetail(p.id);
+      renderContent();
+    };
+  });
+}
+
+function drawChart(canvas, logs){
+  const dpr = window.devicePixelRatio || 1;
+  const w = canvas.clientWidth || 500;
+  const h = canvas.clientHeight || 180;
+  canvas.width = w * dpr;
+  canvas.height = h * dpr;
+  const ctx = canvas.getContext('2d');
+  ctx.scale(dpr, dpr);
+  ctx.clearRect(0, 0, w, h);
+
+  // 按日期聚合（同一天取最后一条）
+  const byDate = new Map();
+  logs.forEach(l => byDate.set(l.date, l.value));
+  const pts = [...byDate.entries()].sort((a, b) => a[0].localeCompare(b[0]));
+
+  if (pts.length === 0){
+    ctx.fillStyle = '#5c6478';
+    ctx.font = '13px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('还没有数据', w / 2, h / 2);
+    return;
+  }
+
+  const vals = pts.map(p => Number(p[1]));
+  let min = Math.min(...vals), max = Math.max(...vals);
+  if (min === max){ min -= 1; max += 1; }
+  const padL = 44, padR = 12, padT = 14, padB = 24;
+  const cw = w - padL - padR, ch = h - padT - padB;
+
+  const xs = i => padL + (pts.length === 1 ? cw / 2 : cw * i / (pts.length - 1));
+  const ys = v => padT + ch - ch * ((v - min) / (max - min));
+
+  // 网格 + Y 轴
+  ctx.strokeStyle = '#232a36';
+  ctx.lineWidth = 1;
+  ctx.fillStyle = '#5c6478';
+  ctx.font = '10.5px sans-serif';
+  ctx.textAlign = 'right';
+  ctx.textBaseline = 'middle';
+  for (let i = 0; i <= 4; i++){
+    const v = min + (max - min) * i / 4;
+    const y = ys(v);
+    ctx.beginPath(); ctx.moveTo(padL, y); ctx.lineTo(w - padR, y); ctx.stroke();
+    ctx.fillText(v.toFixed(1), padL - 8, y);
+  }
+
+  // 面积
+  const grad = ctx.createLinearGradient(0, padT, 0, padT + ch);
+  grad.addColorStop(0, 'rgba(79,140,255,.28)');
+  grad.addColorStop(1, 'rgba(79,140,255,0)');
+  ctx.beginPath();
+  pts.forEach((p, i) => { i ? ctx.lineTo(xs(i), ys(Number(p[1]))) : ctx.moveTo(xs(i), ys(Number(p[1]))); });
+  ctx.lineTo(xs(pts.length - 1), padT + ch);
+  ctx.lineTo(xs(0), padT + ch);
+  ctx.closePath();
+  ctx.fillStyle = grad;
+  ctx.fill();
+
+  // 折线
+  ctx.beginPath();
+  pts.forEach((p, i) => { i ? ctx.lineTo(xs(i), ys(Number(p[1]))) : ctx.moveTo(xs(i), ys(Number(p[1]))); });
+  ctx.strokeStyle = '#4f8cff';
+  ctx.lineWidth = 2;
+  ctx.lineJoin = 'round';
+  ctx.stroke();
+
+  // 点
+  pts.forEach((p, i) => {
+    ctx.beginPath();
+    ctx.arc(xs(i), ys(Number(p[1])), 3, 0, Math.PI * 2);
+    ctx.fillStyle = '#4f8cff';
+    ctx.fill();
+    ctx.strokeStyle = '#161a22';
+    ctx.lineWidth = 1.5;
+    ctx.stroke();
+  });
+
+  // X 轴首尾日期
+  ctx.fillStyle = '#5c6478';
+  ctx.textBaseline = 'top';
+  ctx.textAlign = 'left';
+  ctx.fillText(pts[0][0].slice(5), padL, h - 16);
+  if (pts.length > 1){
+    ctx.textAlign = 'right';
+    ctx.fillText(pts[pts.length - 1][0].slice(5), w - padR, h - 16);
+  }
+}
+
+/* =====================================================
+   导出 / 导入
+===================================================== */
+async function exportAll(){
+  const items = await idbGetAll('items');
+  const plans = await idbGetAll('plans');
+  const logs = await idbGetAll('logs');
+
+  showProgress('正在打包数据…', 0);
+  const out = {app: 'myVault', version: 1, exportedAt: new Date().toISOString(), items: [], plans, logs};
+  for (let i = 0; i < items.length; i++){
+    const it = {...items[i]};
+    if (it.blob instanceof Blob){
+      it.blobData = await blobToDataURL(it.blob);
+      delete it.blob;
+    }
+    out.items.push(it);
+    if (i % 5 === 0){
+      setProgress(i / items.length);
+      await new Promise(r => setTimeout(r, 0));
+    }
+  }
+  setProgress(1);
+  const json = JSON.stringify(out);
+  const d = new Date();
+  const name = `收藏库备份_${d.getFullYear()}${String(d.getMonth()+1).padStart(2,'0')}${String(d.getDate()).padStart(2,'0')}.json`;
+  download(new Blob([json], {type: 'application/json'}), name);
+  hideProgress();
+  toast('备份已导出');
+}
+
+async function importAll(file, merge = true){
+  const text = await file.text();
+  let data;
+  try { data = JSON.parse(text); } catch(e){ toast('文件格式不对', true); return; }
+  if (!data || !Array.isArray(data.items)){ toast('这不是有效的备份文件', true); return; }
+
+  if (!merge){
+    if (!confirm('将清空现有全部数据，用备份覆盖。确定吗？')) return;
+    await idbClear('items'); await idbClear('plans'); await idbClear('logs');
+  }
+
+  showProgress('正在导入…', 0);
+  for (let i = 0; i < data.items.length; i++){
+    const it = {...data.items[i]};
+    if (it.blobData){
+      try { it.blob = dataURLToBlob(it.blobData); } catch(e){}
+      delete it.blobData;
+    }
+    await idbPut('items', it);
+    if (i % 5 === 0){ setProgress(i / Math.max(1, data.items.length)); await new Promise(r => setTimeout(r, 0)); }
+  }
+  for (const p of (data.plans || [])) await idbPut('plans', p);
+  for (const l of (data.logs || [])) await idbPut('logs', l);
+  setProgress(1);
+
+  state.urlCache.forEach(u => URL.revokeObjectURL(u));
+  state.urlCache.clear();
+  await loadAll();
+  hideProgress();
+  renderNav(); renderTags(); renderContent();
+  toast('导入完成');
+}
+
+function showProgress(text, pct){
+  $('#progText').textContent = text;
+  $('#progBar').style.width = (pct * 100) + '%';
+  $('#progress').style.display = 'flex';
+}
+function setProgress(pct){ $('#progBar').style.width = (pct * 100) + '%'; }
+function hideProgress(){ $('#progress').style.display = 'none'; }
+
+/* =====================================================
+   添加按钮 —— 菜单
+===================================================== */
+function openAddMenu(){
+  openModal(`
+    <h3>添加内容</h3>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+      <button class="btn ghost" data-add="image" style="padding:20px 10px;font-size:14px">🖼️ 图片 / 视频</button>
+      <button class="btn ghost" data-add="site" style="padding:20px 10px;font-size:14px">🔖 网站</button>
+      <button class="btn ghost" data-add="anime" style="padding:20px 10px;font-size:14px">📺 动漫</button>
+      <button class="btn ghost" data-add="plan" style="padding:20px 10px;font-size:14px">🎯 计划</button>
+    </div>
+    <div class="modal-actions"><span class="sp"></span><button class="btn ghost" id="a-cancel">取消</button></div>
+  `);
+  $('#a-cancel').onclick = closeModal;
+  $$('[data-add]').forEach(b => {
+    b.onclick = () => {
+      const t = b.dataset.add;
+      closeModal();
+      if (t === 'image') $('#fileImages').click();
+      else if (t === 'plan') openPlanEditor(null);
+      else openItemEditor(t, null);
+    };
+  });
+}
+
+/* =====================================================
+   批量添加图片
+===================================================== */
+async function addImages(files){
+  const list = [...files];
+  if (!list.length) return;
+  showProgress(`处理中 0/${list.length}`, 0);
+  let ok = 0, fail = 0;
+
+  for (let i = 0; i < list.length; i++){
+    const f = list[i];
+    try {
+      let thumb;
+      if (f.type.startsWith('video/')) thumb = await grabVideoFrame(f);
+      else if (f.type.startsWith('image/')) thumb = await compressImage(f);
+      else { fail++; continue; }
+
+      const item = {
+        id: uid(),
+        type: 'image',
+        title: f.name.replace(/\.[^.]+$/, ''),
+        blob: thumb.blob,
+        w: thumb.w, h: thumb.h,
+        isVideo: f.type.startsWith('video/'),
+        tags: [], note: '', source: '',
+        createdAt: Date.now(),
+        updatedAt: Date.now(),
+      };
+      await idbPut('items', item);
+      ok++;
+    } catch(e){
+      console.error(e);
+      fail++;
+    }
+    setProgress((i + 1) / list.length);
+    $('#progText').textContent = `处理中 ${i + 1}/${list.length}`;
+    await new Promise(r => setTimeout(r, 0));
+  }
+
+  await loadAll();
+  hideProgress();
+  renderNav(); renderTags(); renderContent();
+  toast(`完成：成功 ${ok} 个${fail ? '，失败 ' + fail + ' 个' : ''}`);
+}
+
+/* =====================================================
+   事件绑定
+===================================================== */
+function bindUI(){
+  // 侧栏导航
+  $('#nav').addEventListener('click', e => {
+    const btn = e.target.closest('button[data-view]');
+    if (!btn) return;
+    state.view = btn.dataset.view;
+    state.tag = null;
+    renderNav(); renderTags(); renderContent();
+    $('#content').scrollTop = 0;
+  });
+
+  // 标签
+  $('#tagList').addEventListener('click', e => {
+    const chip = e.target.closest('[data-tag]');
+    if (!chip) return;
+    const t = chip.dataset.tag;
+    state.tag = state.tag === t ? null : t;
+    if (state.tag && state.view === 'plan') state.view = 'all';
+    renderNav(); renderTags(); renderContent();
+    $('#content').scrollTop = 0;
+  });
+
+  // 搜索
+  let searchTimer;
+  $('#search').addEventListener('input', e => {
+    clearTimeout(searchTimer);
+    searchTimer = setTimeout(() => {
+      state.search = e.target.value;
+      renderContent();
+    }, 160);
+  });
+
+  // 添加
+  $('#btnAdd').onclick = openAddMenu;
+
+  // 图片文件选择
+  $('#fileImages').addEventListener('change', async e => {
+    const files = e.target.files;
+    e.target.value = '';
+    await addImages(files);
+  });
+
+  // 内容区点击
+  $('#content').addEventListener('click', e => {
+    const editBtn = e.target.closest('[data-act="edit"]');
+    if (editBtn){
+      e.stopPropagation();
+      const it = state.items.find(x => x.id === editBtn.dataset.id);
+      if (it) openItemEditor(it.type, it);
+      return;
+    }
+    const card = e.target.closest('.card, .plan-card');
+    if (!card) return;
+    const id = card.dataset.id;
+    const act = card.dataset.act;
+    if (act === 'plan'){ openPlanDetail(id); return; }
+    const it = state.items.find(x => x.id === id);
+    if (!it) return;
+    if (act === 'view') openLightbox(it);
+    else if (act === 'open'){ if (it.url) window.open(it.url, '_blank'); }
+    else if (act === 'edit') openItemEditor(it.type, it);
+  });
+
+  // 无限滚动
+  $('#content').addEventListener('scroll', () => {
+    const el = $('#content');
+    if (el.scrollTop + el.clientHeight > el.scrollHeight - 420){
+      if (state.view !== 'plan' && state.shown < state.filtered.length){
+        state.shown = Math.min(state.shown + state.pageSize, state.filtered.length);
+        appendCards();
+      }
+    }
+  });
+
+  // 导出 / 导入
+  $('#btnExport').onclick = exportAll;
+  $('#btnImport').onclick = () => $('#fileImport').click();
+  $('#fileImport').addEventListener('change', async e => {
+    const f = e.target.files[0];
+    e.target.value = '';
+    if (!f) return;
+    const merge = confirm('点「确定」= 合并导入（保留现有数据，同 ID 覆盖）\n点「取消」= 覆盖导入（清空后导入）');
+    await importAll(f, merge);
+  });
+
+  // 灯箱
+  $('#lightbox').addEventListener('click', () => {
+    $('#lightbox').style.display = 'none';
+    $('#lightbox').innerHTML = '';
+  });
+
+  // 快捷键
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape'){
+      if ($('#lightbox').style.display === 'flex'){
+        $('#lightbox').style.display = 'none';
+        $('#lightbox').innerHTML = '';
+      } else if ($('#modalRoot').style.display === 'block'){
+        closeModal();
+      }
+    }
+    if (e.key === '/' && document.activeElement.tagName !== 'INPUT' && document.activeElement.tagName !== 'TEXTAREA'){
+      e.preventDefault();
+      $('#search').focus();
+    }
+  });
+}
+
+function openLightbox(it){
+  if (!it.blob){ openItemEditor(it.type, it); return; }
+  const u = getURL(it);
+  const lb = $('#lightbox');
+  lb.innerHTML = `<img src="${u}" alt="">`;
+  lb.style.display = 'flex';
+}
+
+/* =====================================================
+   启动
+===================================================== */
+(async function init(){
+  try {
+    await openDB();
+  } catch(e){
+    console.error(e);
+    document.body.innerHTML = `<div style="padding:50px;font-family:sans-serif;color:#e7eaf0;line-height:1.9;max-width:600px">
+      <h2 style="margin-bottom:14px">无法初始化本地数据库</h2>
+      <p>请使用 <b>Chrome</b> 或 <b>Edge</b> 浏览器打开这个文件。</p>
+      <p style="color:#8b93a7;font-size:13px">如果用的是无痕模式，请换成普通窗口。</p>
+      <p style="color:#8b93a7;font-size:13px">错误信息：${esc(String(e && e.message || e))}</p>
+    </div>`;
+    return;
+  }
+  await loadAll();
+  bindUI();
+  renderNav();
+  renderTags();
+  renderContent();
+
+  if (location.protocol === 'file:'){
+    console.log('本机模式运行中');
+  }
+})();
+</script>
+</body>
+</html>
